@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: delaine_app
+        restart: unless-stopped
+        working_dir: /var/www/html
+        volumes:
+            - .:/var/www/html
+            - ./vendor:/var/www/html/vendor
+            - ./node_modules:/var/www/html/node_modules
+        ports:
+            - "8000:8000"
+            - "5173:5173"
+        depends_on:
+            - db
+            - mailpit
+        command: ["./start.sh"]
+
+    db:
+        image: mysql:8.0
+        container_name: delaine_db
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: delaine
+            MYSQL_USER: delaine_user
+            MYSQL_PASSWORD: secret
+        volumes:
+            - db_data:/var/lib/mysql
+        ports:
+            - "3306:3306"
+
+    mailpit:
+        image: axllent/mailpit
+        container_name: delaine_mailpit
+        restart: unless-stopped
+        ports:
+            - "8025:8025"
+            - "1025:1025"
+
+volumes:
+    db_data:
