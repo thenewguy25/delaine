@@ -17,8 +17,12 @@
                     </x-nav-link>
 
                     @can('manage users')
-                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.*')">
-                            {{ __('Admin Panel') }}
+                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                            {{ __('User Management') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.invitations.index')"
+                            :active="request()->routeIs('admin.invitations.*')">
+                            {{ __('Invitation Management') }}
                         </x-nav-link>
                     @endcan
                 </div>
@@ -44,6 +48,31 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        <!-- Impersonation Notice -->
+                        @if(\App\Http\Controllers\Admin\ImpersonationController::isImpersonating())
+                            <div class="px-4 py-2 bg-purple-100 border-b border-purple-200">
+                                <div class="text-xs text-purple-600 font-medium">
+                                    Impersonating: {{ Auth::user()->name }}
+                                </div>
+                                <div class="text-xs text-purple-500">
+                                    Admin:
+                                    {{ \App\Http\Controllers\Admin\ImpersonationController::getImpersonator()?->name }}
+                                </div>
+                            </div>
+
+                            <!-- Stop Impersonation -->
+                            <form method="POST" action="{{ route('admin.impersonation.stop') }}">
+                                @csrf
+                                <x-dropdown-link :href="route('admin.impersonation.stop')" onclick="event.preventDefault();
+                                                                this.closest('form').submit();"
+                                    class="text-purple-600 font-medium">
+                                    {{ __('Stop Impersonating') }}
+                                </x-dropdown-link>
+                            </form>
+
+                            <div class="border-t border-gray-100"></div>
+                        @endif
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -85,8 +114,12 @@
             </x-responsive-nav-link>
 
             @can('manage users')
-                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.*')">
-                    {{ __('Admin Panel') }}
+                <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+                    {{ __('User Management') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.invitations.index')"
+                    :active="request()->routeIs('admin.invitations.*')">
+                    {{ __('Invitation Management') }}
                 </x-responsive-nav-link>
             @endcan
         </div>
@@ -96,9 +129,33 @@
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+
+                <!-- Impersonation Notice -->
+                @if(\App\Http\Controllers\Admin\ImpersonationController::isImpersonating())
+                    <div class="mt-2 p-2 bg-purple-100 rounded">
+                        <div class="text-xs text-purple-600 font-medium">
+                            Impersonating: {{ Auth::user()->name }}
+                        </div>
+                        <div class="text-xs text-purple-500">
+                            Admin: {{ \App\Http\Controllers\Admin\ImpersonationController::getImpersonator()?->name }}
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="mt-3 space-y-1">
+                <!-- Stop Impersonation -->
+                @if(\App\Http\Controllers\Admin\ImpersonationController::isImpersonating())
+                    <form method="POST" action="{{ route('admin.impersonation.stop') }}">
+                        @csrf
+                        <x-responsive-nav-link :href="route('admin.impersonation.stop')"
+                            onclick="event.preventDefault(); this.closest('form').submit();"
+                            class="text-purple-600 font-medium">
+                            {{ __('Stop Impersonating') }}
+                        </x-responsive-nav-link>
+                    </form>
+                @endif
+
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>

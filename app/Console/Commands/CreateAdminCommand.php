@@ -114,20 +114,27 @@ class CreateAdminCommand extends Command
     {
         $this->info('🔧 Setting up roles and permissions...');
 
-        // Create admin role if it doesn't exist
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        // Create essential permissions
+        $permissions = [
+            'manage users',
+            'manage roles',
+            'manage permissions',
+            'manage settings',
+        ];
 
-        // Create user role if it doesn't exist
-        Role::firstOrCreate(['name' => 'user']);
-
-        // Create manage users permission if it doesn't exist
-        $manageUsersPermission = Permission::firstOrCreate(['name' => 'manage users']);
-
-        // Assign permission to admin role
-        if (!$adminRole->hasPermissionTo('manage users')) {
-            $adminRole->givePermissionTo('manage users');
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        $this->info('✅ Roles and permissions configured');
+        // Create admin role with all permissions
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->syncPermissions($permissions);
+
+        // Create user role (basic access)
+        Role::firstOrCreate(['name' => 'user']);
+
+        $this->info('✅ Essential roles and permissions configured');
+        $this->info('💡 To add more roles, use: php artisan role:add <role_name> <permissions>');
+        $this->info('💡 For bulk setup, use: php artisan db:seed --class=RoleSeeder');
     }
 }

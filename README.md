@@ -216,6 +216,64 @@ This command will:
 -   Grant manage users permission
 -   Auto-verify email for local development
 
+### Adding Custom Roles
+
+#### Quick Role Addition
+
+```bash
+# Add a single role with permissions
+php artisan role:add moderator "moderate content,manage comments"
+
+# Add a role without permissions
+php artisan role:add editor
+```
+
+#### Bulk Role Setup
+
+```bash
+# Install all default roles and permissions
+php artisan db:seed --class=RoleSeeder
+```
+
+#### Manual Role Assignment
+
+```bash
+# Assign role to user
+php artisan tinker
+User::find(1)->assignRole('moderator');
+
+# Check user roles
+User::find(1)->roles;
+
+# Remove role from user
+User::find(1)->removeRole('moderator');
+```
+
+### User Impersonation
+
+Admins can impersonate other users to test the user experience:
+
+#### Features
+
+-   **Start Impersonation**: Click "Impersonate" button in user management
+-   **Visual Indicators**: Purple notice shows when impersonating
+-   **Stop Impersonation**: "Stop Impersonating" button in navigation
+-   **Safety Checks**: Cannot impersonate inactive users or yourself
+
+#### Usage
+
+1. Go to Admin Panel → User Management
+2. Click "Impersonate" next to any active user
+3. You'll be logged in as that user
+4. Use "Stop Impersonating" to return to your admin account
+
+### Available Commands
+
+-   **`php artisan make:admin`** - Create admin user
+-   **`php artisan role:add <name> [permissions]`** - Add custom role
+-   **`php artisan db:seed --class=RoleSeeder`** - Setup all roles
+-   **`php artisan verify:acl`** - Verify ACL setup
+
 ### Protecting Routes
 
 ```php
@@ -228,6 +286,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'permission:manage users'])->group(function () {
     // Permission-protected routes
 });
+
+// Require multiple roles
+Route::middleware(['auth', 'role:admin|moderator'])->group(function () {
+    // Admin or moderator routes
+});
 ```
 
 ## 🐳 Docker Configuration
@@ -235,8 +298,18 @@ Route::middleware(['auth', 'permission:manage users'])->group(function () {
 ### Services
 
 -   **app**: Laravel application (PHP 8.2, Apache)
+    -   **URL**: http://localhost:8000
 -   **db**: MySQL 8.0 database
+    -   **Port**: 3306
 -   **mailpit**: Email testing service
+    -   **Web UI**: http://localhost:8025
+    -   **SMTP Port**: 1025
+
+### Accessing Services
+
+-   **Application**: http://localhost:8000
+-   **Mailpit (Email Testing)**: http://localhost:8025
+-   **Database**: localhost:3306
 
 ### Environment Variables
 
