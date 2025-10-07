@@ -172,10 +172,18 @@ class InvitationController extends Controller
     /**
      * Remove the specified invitation.
      */
-    public function destroy(Invitation $invitation): RedirectResponse
+    public function destroy(Invitation $invitation): RedirectResponse|JsonResponse
     {
         $email = $invitation->email;
         $invitation->delete();
+
+        // Handle AJAX requests
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Invitation for {$email} has been cancelled."
+            ]);
+        }
 
         return redirect()->route('admin.invitations.index')
             ->with('success', "Invitation for {$email} has been cancelled.");
@@ -184,40 +192,52 @@ class InvitationController extends Controller
     /**
      * Resend an invitation email.
      */
-    public function resend(Invitation $invitation): RedirectResponse
+    public function resend(Invitation $invitation): RedirectResponse|JsonResponse
     {
         if ($invitation->isUsed()) {
-            return back()->withErrors([
-                'invitation' => 'Cannot resend a used invitation.'
-            ]);
+            $error = 'Cannot resend a used invitation.';
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => $error], 400);
+            }
+            return back()->withErrors(['invitation' => $error]);
         }
 
         if ($invitation->isExpired()) {
-            return back()->withErrors([
-                'invitation' => 'Cannot resend an expired invitation.'
-            ]);
+            $error = 'Cannot resend an expired invitation.';
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => $error], 400);
+            }
+            return back()->withErrors(['invitation' => $error]);
         }
 
         try {
             Mail::to($invitation->email)->send(new InvitationMail($invitation));
 
-            return back()->with('success', 'Invitation email resent successfully.');
+            $message = 'Invitation email resent successfully.';
+            if (request()->ajax()) {
+                return response()->json(['success' => true, 'message' => $message]);
+            }
+            return back()->with('success', $message);
         } catch (\Exception $e) {
-            return back()->withErrors([
-                'email' => 'Failed to send invitation email. Please try again.'
-            ]);
+            $error = 'Failed to send invitation email. Please try again.';
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => $error], 500);
+            }
+            return back()->withErrors(['email' => $error]);
         }
     }
 
     /**
      * Extend the expiry date of an invitation.
      */
-    public function extend(Invitation $invitation): RedirectResponse
+    public function extend(Invitation $invitation): RedirectResponse|JsonResponse
     {
         if ($invitation->isUsed()) {
-            return back()->withErrors([
-                'invitation' => 'Cannot extend a used invitation.'
-            ]);
+            $error = 'Cannot extend a used invitation.';
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => $error], 400);
+            }
+            return back()->withErrors(['invitation' => $error]);
         }
 
         $expiryHours = config('registration.invitation_expiry_hours', 72);
@@ -225,7 +245,11 @@ class InvitationController extends Controller
             'expires_at' => now()->addHours($expiryHours)
         ]);
 
-        return back()->with('success', 'Invitation expiry date extended successfully.');
+        $message = 'Invitation expiry date extended successfully.';
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+        return back()->with('success', $message);
     }
 
     /**

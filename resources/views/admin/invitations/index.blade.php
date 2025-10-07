@@ -4,10 +4,17 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Invitation Management') }}
             </h2>
-            <a href="{{ route('admin.invitations.create') }}"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                {{ __('Send Invitation') }}
-            </a>
+            @can('manage users')
+                <a href="{{ route('admin.invitations.create') }}"
+                    style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border: none;"
+                    onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: white;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    {{ __('Send Invitation') }}
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -87,149 +94,123 @@
                 </div>
             </div>
 
-            <!-- Bulk Actions -->
+            <!-- Invitations Table -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <!-- Bulk Action Controls -->
-                    <form id="bulk-form" method="POST" action="{{ route('admin.invitations.bulk-action') }}">
-                        @csrf
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center space-x-4">
-                                <input type="checkbox" id="select-all"
-                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <label for="select-all" class="text-sm font-medium text-gray-700">Select All</label>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Email</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Type</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Role</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Created By</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Expires</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse($invitations as $invitation)
+                                    <tr
+                                        class="{{ $invitation->isExpired() ? 'bg-red-50' : ($invitation->isUsed() ? 'bg-green-50' : '') }}">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ $invitation->email }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <span
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $invitation->invitation_type === 'admin' ? 'bg-red-100 text-red-800' : ($invitation->invitation_type === 'user' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
+                                                {{ ucfirst($invitation->invitation_type) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $invitation->role ?? 'Default' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($invitation->isUsed())
+                                                <span
+                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                    Used
+                                                </span>
+                                            @elseif($invitation->isExpired())
+                                                <span
+                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                    Expired
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                    Active
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $invitation->creator->name }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $invitation->expires_at->format('M d, Y H:i') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex space-x-2">
+                                                <a href="{{ route('admin.invitations.show', $invitation) }}"
+                                                    class="text-indigo-600 hover:text-indigo-900">View</a>
 
-                                <select name="action" id="bulk-action"
-                                    class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    required>
-                                    <option value="">Bulk Actions</option>
-                                    <option value="delete">Delete Selected</option>
-                                    <option value="extend">Extend Expiry</option>
-                                </select>
+                                                @if(!$invitation->isUsed())
+                                                    <a href="{{ route('admin.invitations.edit', $invitation) }}"
+                                                        class="text-blue-600 hover:text-blue-900">Edit</a>
 
-                                <button type="submit"
-                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                                    Execute
-                                </button>
-                            </div>
-                        </div>
+                                                    <form method="POST"
+                                                        action="{{ route('admin.invitations.resend', $invitation) }}"
+                                                        class="inline">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="text-green-600 hover:text-green-900">Resend</button>
+                                                    </form>
 
-                        <!-- Invitations Table -->
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            <input type="checkbox" id="select-all-checkbox"
-                                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        </th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Type</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Role</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Created By</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Expires</th>
-                                        <th
-                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Actions</th>
+                                                    <form method="POST"
+                                                        action="{{ route('admin.invitations.extend', $invitation) }}"
+                                                        class="inline">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="text-yellow-600 hover:text-yellow-900">Extend</button>
+                                                    </form>
+                                                @endif
+
+                                                <form method="POST"
+                                                    action="{{ route('admin.invitations.destroy', $invitation) }}"
+                                                    class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900"
+                                                        onclick="return confirm('Are you sure you want to delete this invitation?')">Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse($invitations as $invitation)
-                                                                    <tr
-                                                                        class="{{ $invitation->isExpired() ? 'bg-red-50' : ($invitation->isUsed() ? 'bg-green-50' : '') }}">
-                                                                        <td class="px-6 py-4 whitespace-nowrap">
-                                                                            <input type="checkbox" name="invitations[]" value="{{ $invitation->id }}"
-                                                                                class="invitation-checkbox rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                                                        </td>
-                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                                            {{ $invitation->email }}
-                                                                        </td>
-                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                            <span
-                                                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                                                                                                                                                                                                                                                                                    {{ $invitation->invitation_type === 'admin' ? 'bg-red-100 text-red-800' :
-                                        ($invitation->invitation_type === 'user' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800') }}">
-                                                                                {{ ucfirst($invitation->invitation_type) }}
-                                                                            </span>
-                                                                        </td>
-                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                            {{ $invitation->role ?? 'Default' }}
-                                                                        </td>
-                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                            @if($invitation->isUsed())
-                                                                                <span
-                                                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                                                    Used
-                                                                                </span>
-                                                                            @elseif($invitation->isExpired())
-                                                                                <span
-                                                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                                                                    Expired
-                                                                                </span>
-                                                                            @else
-                                                                                <span
-                                                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                                                    Active
-                                                                                </span>
-                                                                            @endif
-                                                                        </td>
-                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                            {{ $invitation->creator->name }}
-                                                                        </td>
-                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                            {{ $invitation->expires_at->format('M d, Y H:i') }}
-                                                                        </td>
-                                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                                            <div class="flex space-x-2">
-                                                                                <a href="{{ route('admin.invitations.show', $invitation) }}"
-                                                                                    class="text-indigo-600 hover:text-indigo-900">View</a>
-
-                                                                                @if(!$invitation->isUsed())
-                                                                                    <a href="{{ route('admin.invitations.edit', $invitation) }}"
-                                                                                        class="text-blue-600 hover:text-blue-900">Edit</a>
-
-                                                                                    <button type="button"
-                                                                                        class="text-green-600 hover:text-green-900 resend-btn"
-                                                                                        data-invitation-id="{{ $invitation->id }}"
-                                                                                        onclick="resendInvitation({{ $invitation->id }})">Resend</button>
-
-                                                                                    <button type="button"
-                                                                                        class="text-yellow-600 hover:text-yellow-900 extend-btn"
-                                                                                        data-invitation-id="{{ $invitation->id }}"
-                                                                                        onclick="extendInvitation({{ $invitation->id }})">Extend</button>
-                                                                                @endif
-
-                                                                                <button type="button" class="text-red-600 hover:text-red-900 delete-btn"
-                                                                                    data-invitation-id="{{ $invitation->id }}"
-                                                                                    onclick="deleteInvitation({{ $invitation->id }})">Delete</button>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="px-6 py-4 text-center text-gray-500">
-                                                No invitations found.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </form>
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                                            No invitations found.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
                     <!-- Pagination -->
                     <div class="mt-6">
@@ -239,122 +220,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Select all functionality
-        document.getElementById('select-all-checkbox').addEventListener('change', function () {
-            const checkboxes = document.querySelectorAll('.invitation-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-
-        // Individual checkbox change
-        document.querySelectorAll('.invitation-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                const allCheckboxes = document.querySelectorAll('.invitation-checkbox');
-                const checkedCheckboxes = document.querySelectorAll('.invitation-checkbox:checked');
-                document.getElementById('select-all-checkbox').checked = allCheckboxes.length === checkedCheckboxes.length;
-            });
-        });
-
-        // Prevent bulk form from interfering with individual forms
-        document.getElementById('bulk-form').addEventListener('submit', function (e) {
-            // Only submit if action is selected
-            const action = document.getElementById('bulk-action').value;
-            if (!action) {
-                e.preventDefault();
-                alert('Please select a bulk action first.');
-                return false;
-            }
-        });
-
-        // CSRF token for AJAX requests
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-            document.querySelector('input[name="_token"]')?.value;
-
-        // Resend invitation function
-        function resendInvitation(invitationId) {
-            console.log('Resending invitation:', invitationId);
-
-            fetch(`/admin/invitations/${invitationId}/resend`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({})
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Invitation email resent successfully!');
-                        location.reload(); // Refresh to show updated status
-                    } else {
-                        alert('Failed to resend invitation. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while resending the invitation.');
-                });
-        }
-
-        // Extend invitation function
-        function extendInvitation(invitationId) {
-            console.log('Extending invitation:', invitationId);
-
-            fetch(`/admin/invitations/${invitationId}/extend`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({})
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Invitation expiry date extended successfully!');
-                        location.reload(); // Refresh to show updated expiry
-                    } else {
-                        alert('Failed to extend invitation. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while extending the invitation.');
-                });
-        }
-
-        // Delete invitation function
-        function deleteInvitation(invitationId) {
-            if (!confirm('Are you sure you want to delete this invitation?')) {
-                return;
-            }
-
-            console.log('Deleting invitation:', invitationId);
-
-            fetch(`/admin/invitations/${invitationId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                }
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Invitation deleted successfully!');
-                        location.reload(); // Refresh to remove the row
-                    } else {
-                        alert('Failed to delete invitation. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while deleting the invitation.');
-                });
-        }
-    </script>
 </x-app-layout>

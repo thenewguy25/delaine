@@ -21,6 +21,11 @@ class UserController extends Controller
             }
         }
 
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->role($request->role);
+        }
+
         // Search by name or email
         if ($request->filled('search')) {
             $search = $request->search;
@@ -30,7 +35,7 @@ class UserController extends Controller
             });
         }
 
-        $users = $query->paginate(15)->withQueryString();
+        $users = $query->with('roles')->paginate(15)->withQueryString();
 
         return view('admin.users.index', compact('users'));
     }
@@ -50,9 +55,18 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'roles' => 'array',
+            'roles.*' => 'exists:roles,name',
         ]);
 
         $user->update($request->only(['name', 'email']));
+
+        // Update roles if provided
+        if ($request->has('roles')) {
+            $user->syncRoles($request->roles);
+        } else {
+            $user->syncRoles([]);
+        }
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User updated successfully.');
