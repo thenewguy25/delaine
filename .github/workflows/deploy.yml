@@ -18,7 +18,7 @@ jobs:
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
     environment: staging
 
     steps:
@@ -48,13 +48,24 @@ jobs:
 
       - name: Create deployment package
         run: |
+          echo "🔍 Debugging deployment package creation..."
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+
           # Create a clean copy of the project for packaging
           mkdir -p /tmp/delaine-deploy
+
+          echo "📁 Created temporary directory: /tmp/delaine-deploy"
 
           # Copy source files only (excluding build artifacts and unnecessary files)
           rsync -av --exclude='.git' --exclude='node_modules' --exclude='tests' --exclude='.github' --exclude='docker-compose.yml' --exclude='Dockerfile' --exclude='.env.example' --exclude='public/build' --exclude='vendor' . /tmp/delaine-deploy/
 
+          echo "📋 Files copied to temporary directory"
+
           cd /tmp/delaine-deploy
+
+          echo "📂 Changed to temporary directory: $(pwd)"
 
           # Install production dependencies in the clean copy
           composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
@@ -65,15 +76,22 @@ jobs:
 
           # Verify build completed successfully
           if [ ! -f "public/build/manifest.json" ]; then
-            echo "Build failed - manifest.json not found"
+            echo "❌ Build failed - manifest.json not found"
             exit 1
           fi
 
+          echo "✅ Build verification passed"
+
           # Create the package using zip instead of tar (more reliable)
+          echo "📦 Creating zip package..."
           zip -r delaine-staging.zip . -x "node_modules/*" ".git/*" "*.log" "*.tmp"
+
+          echo "📦 Zip package created successfully"
 
           # Move package back to workspace
           mv delaine-staging.zip ${{ github.workspace }}/
+
+          echo "✅ Package moved to workspace: ${{ github.workspace }}"
 
       - name: Deploy to staging server
         run: |
@@ -132,13 +150,24 @@ jobs:
 
       - name: Create deployment package
         run: |
+          echo "🔍 Debugging deployment package creation..."
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+
           # Create a clean copy of the project for packaging
           mkdir -p /tmp/delaine-deploy-prod
+
+          echo "📁 Created temporary directory: /tmp/delaine-deploy-prod"
 
           # Copy source files only (excluding build artifacts and unnecessary files)
           rsync -av --exclude='.git' --exclude='node_modules' --exclude='tests' --exclude='.github' --exclude='docker-compose.yml' --exclude='Dockerfile' --exclude='.env.example' --exclude='public/build' --exclude='vendor' . /tmp/delaine-deploy-prod/
 
+          echo "📋 Files copied to temporary directory"
+
           cd /tmp/delaine-deploy-prod
+
+          echo "📂 Changed to temporary directory: $(pwd)"
 
           # Install production dependencies in the clean copy
           composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
@@ -149,15 +178,22 @@ jobs:
 
           # Verify build completed successfully
           if [ ! -f "public/build/manifest.json" ]; then
-            echo "Build failed - manifest.json not found"
+            echo "❌ Build failed - manifest.json not found"
             exit 1
           fi
 
+          echo "✅ Build verification passed"
+
           # Create the package using zip instead of tar (more reliable)
+          echo "📦 Creating zip package..."
           zip -r delaine-production.zip . -x "node_modules/*" ".git/*" "*.log" "*.tmp"
+
+          echo "📦 Zip package created successfully"
 
           # Move package back to workspace
           mv delaine-production.zip ${{ github.workspace }}/
+
+          echo "✅ Package moved to workspace: ${{ github.workspace }}"
 
       - name: Create backup
         run: |

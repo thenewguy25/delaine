@@ -823,6 +823,57 @@ npm install
 -   Check Mailpit at http://localhost:8025
 -   Verify SMTP settings in `.env`
 
+### CI/CD Troubleshooting
+
+#### Common CI/CD Issues and Solutions
+
+**1. "tar: .: file changed as we read it" Error**
+This error occurs when files are being modified during the tar creation process. Our solution:
+
+-   Uses `zip` instead of `tar` for more reliable packaging
+-   Creates a clean copy in `/tmp/` before packaging
+-   Excludes problematic directories (`node_modules`, `.git`, etc.)
+
+**2. Deprecated GitHub Actions**
+
+-   Updated `actions/upload-artifact` from `v3` to `v4`
+-   All workflows use current action versions
+
+**3. PHP CS Fixer Configuration**
+
+-   Fixed by adding path parameter: `php-cs-fixer fix . --dry-run`
+-   Ensures proper file discovery
+
+**4. Docker Build Context Issues**
+
+-   Fixed by specifying working directory: `--workdir /var/www/html`
+-   Ensures `artisan` command runs in correct context
+
+#### Testing Deployment Locally
+
+You can test the deployment package creation locally:
+
+```bash
+# Run the test script
+./test-deployment.sh
+
+# Or manually test the process
+mkdir -p /tmp/delaine-test
+rsync -av --exclude='.git' --exclude='node_modules' --exclude='tests' --exclude='.github' --exclude='docker-compose.yml' --exclude='Dockerfile' --exclude='.env.example' --exclude='public/build' --exclude='vendor' . /tmp/delaine-test/
+cd /tmp/delaine-test
+composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
+npm ci
+npm run build
+zip -r delaine-test.zip . -x "node_modules/*" ".git/*" "*.log" "*.tmp"
+```
+
+#### Workflow Triggers
+
+-   **Main CI/CD Pipeline**: Runs on push to `main`/`develop` and PRs
+-   **Staging Deployment**: Runs on push to `develop` branch
+-   **Production Deployment**: Runs on push to `main` branch
+-   **Manual Deployment**: Available via GitHub Actions UI
+
 ## 📚 Additional Resources
 
 -   [Laravel Documentation](https://laravel.com/docs)
