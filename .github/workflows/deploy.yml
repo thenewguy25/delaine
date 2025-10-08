@@ -63,8 +63,14 @@ jobs:
           # Build assets in the clean copy
           npm run build
 
-          # Now create the package (no file conflicts since we're in a clean directory)
-          tar -czf delaine-staging.tar.gz .
+          # Verify build completed successfully
+          if [ ! -f "public/build/manifest.json" ]; then
+            echo "Build failed - manifest.json not found"
+            exit 1
+          fi
+
+          # Create the package using a more robust approach
+          tar -czf delaine-staging.tar.gz --exclude='node_modules' --exclude='.git' .
 
           # Move package back to workspace
           mv delaine-staging.tar.gz ${{ github.workspace }}/
@@ -141,8 +147,14 @@ jobs:
           # Build assets in the clean copy
           npm run build
 
-          # Now create the package (no file conflicts since we're in a clean directory)
-          tar -czf delaine-production.tar.gz .
+          # Verify build completed successfully
+          if [ ! -f "public/build/manifest.json" ]; then
+            echo "Build failed - manifest.json not found"
+            exit 1
+          fi
+
+          # Create the package using a more robust approach
+          tar -czf delaine-production.tar.gz --exclude='node_modules' --exclude='.git' .
 
           # Move package back to workspace
           mv delaine-production.tar.gz ${{ github.workspace }}/
