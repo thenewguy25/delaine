@@ -1,0 +1,47 @@
+/* Modern Dashboard Styles */
+.dashboard-container {
+    @apply min-h-screen bg-gray-50;
+}
+
+.dashboard-header {
+    @apply bg-white shadow-sm border-b border-gray-200;
+}
+
+.dashboard-sidebar {
+    @apply bg-white shadow-lg h-full;
+}
+
+.dashboard-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+.dashboard-button {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.dashboard-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.dashboard-table {
+    @apply w-full bg-white rounded-lg shadow-sm overflow-hidden;
+}
+
+.dashboard-table th {
+    @apply bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.dashboard-table td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-sidebar {
+        @apply hidden;
+    }
+    
+    .dashboard-container {
+        @apply px-4;
+    }
+}

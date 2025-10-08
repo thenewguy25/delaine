@@ -1,0 +1,27 @@
+{
+    "name": "Modern Dashboard Template",
+    "version": "1.0.0",
+    "description": "Clean, modern dashboard design with Tailwind CSS components and layouts",
+    "author": "Delaine Team",
+    "compatibility": "delaine:^1.0",
+    "files": {
+        "styles": "resources/css/templates/",
+        "scripts": "resources/js/templates/",
+        "components": "resources/views/components/templates/",
+        "layouts": "resources/views/layouts/templates/",
+        "assets": "public/assets/templates/"
+    },
+    "dependencies": [],
+    "setup": [
+        "npm run build"
+    ],
+    "features": [
+        "Modern dashboard layout",
+        "Responsive design",
+        "Tailwind CSS components",
+        "Interactive JavaScript components",
+        "Clean typography",
+        "Professional color scheme"
+    ],
+    "documentation": "https://github.com/thenewguy25/delaine-templates/blob/main/dashboard/README.md"
+}

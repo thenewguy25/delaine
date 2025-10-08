@@ -40,9 +40,16 @@ A modern Laravel-based web application framework designed for rapid development 
     -   CI/CD ready with detailed test documentation
 
 -   **🚀 Simple CI/CD**
+
     -   Automated testing on every push and PR
     -   Frontend asset building
     -   Automated production deployment
+
+-   **📦 Template System**
+    -   Download templates from anywhere and integrate seamlessly
+    -   Focus on styles, formatting, and frontend components
+    -   Automatic asset management and build integration
+    -   Easy template creation and distribution
 
 ## 🛠️ Prerequisites
 
@@ -314,6 +321,9 @@ Admins can impersonate other users to test the user experience:
 -   **`php artisan role:add <name> [permissions]`** - Add custom role
 -   **`php artisan db:seed --class=RoleSeeder`** - Setup all roles
 -   **`php artisan verify:acl`** - Verify ACL setup
+-   **`php artisan delaine:integrate-template <path>`** - Integrate a template
+-   **`php artisan delaine:templates`** - List installed templates
+-   **`php artisan delaine:remove-template <name>`** - Remove a template
 
 ### Protecting Routes
 
@@ -552,6 +562,56 @@ Delaine includes a streamlined GitHub Actions CI/CD pipeline focused on the esse
 -   **Fast**: Only essential steps, quick feedback
 -   **Reliable**: Focused on core functionality
 -   **Maintainable**: Easy to modify and extend
+
+## 📦 Template System
+
+Delaine includes a powerful template integration system that allows developers to download templates from anywhere and integrate them seamlessly.
+
+### 🚀 Quick Start
+
+```bash
+# Download a template from anywhere (GitHub, marketplace, etc.)
+# Then integrate it into your Delaine project
+php artisan delaine:integrate-template /path/to/template
+
+# Example with sample blog template
+php artisan delaine:integrate-template ./templates/sample-blog
+```
+
+### 📋 Managing Templates
+
+```bash
+# List all installed templates
+php artisan delaine:templates
+
+# Remove a template
+php artisan delaine:remove-template blog-template
+```
+
+### 🎯 Available Templates
+
+-   **Modern Dashboard Template**: Clean, responsive dashboard with Tailwind CSS components
+-   **Landing Page Template**: Marketing pages with modern design (coming soon)
+-   **Component Library**: Reusable UI components (coming soon)
+
+### 🛠️ Creating Templates
+
+Templates focus on **frontend assets** and follow a simple structure:
+
+-   **styles**: CSS files (Tailwind, custom CSS)
+-   **scripts**: JavaScript files (interactions, animations)
+-   **components**: Blade components (reusable UI elements)
+-   **layouts**: Blade layouts (page structures)
+-   **assets**: Images, fonts, static files
+
+See [`templates/README.md`](templates/README.md) for detailed documentation.
+
+### 🎉 Benefits
+
+-   **Flexible**: Download templates from anywhere (Tailwind UI, Creative Market, etc.)
+-   **Focused**: Templates provide styles and components, not full MVC
+-   **Integrated**: Works seamlessly with Delaine's ACL and admin systems
+-   **Extensible**: Easy to create and distribute new templates
 
 #### Test Results
 
