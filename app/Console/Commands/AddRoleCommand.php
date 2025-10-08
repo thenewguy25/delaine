@@ -58,8 +58,9 @@ class AddRoleCommand extends Command
                 $this->info("📋 Adding permissions: " . implode(', ', $permissionArray));
 
                 foreach ($permissionArray as $permissionName) {
-                    if (empty($permissionName))
+                    if (empty($permissionName)) {
                         continue;
+                    }
 
                     $permission = Permission::firstOrCreate(['name' => $permissionName]);
                     $role->givePermissionTo($permission);

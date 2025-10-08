@@ -39,11 +39,10 @@ A modern Laravel-based web application framework designed for rapid development 
     -   Automated test database setup with RefreshDatabase
     -   CI/CD ready with detailed test documentation
 
--   **🚀 GitHub Actions CI/CD**
+-   **🚀 Simple CI/CD**
     -   Automated testing on every push and PR
-    -   Code quality checks with PHPStan and PHP CS Fixer
-    -   Automated deployments to staging and production
-    -   Manual workflow triggers for on-demand testing
+    -   Frontend asset building
+    -   Automated production deployment
 
 ## 🛠️ Prerequisites
 
@@ -512,197 +511,47 @@ See [`.github/README.md`](.github/README.md) for detailed workflow documentation
       php artisan test --testsuite=Unit --stop-on-failure
 ```
 
-## 🚀 CI/CD Pipeline
+## 🚀 Simple CI/CD Pipeline
 
-Delaine includes a complete GitHub Actions CI/CD pipeline with automated testing, code quality checks, security scanning, and deployments.
+Delaine includes a streamlined GitHub Actions CI/CD pipeline focused on the essentials.
 
-### 📋 Available Workflows
+### 📋 What It Does
 
-#### 1. **Main CI/CD Pipeline** (`ci.yml`)
+**Main CI/CD Pipeline** (`ci.yml`):
 
-**Triggers:** Push to `main`/`develop`, Pull Requests
+-   ✅ **Automated Testing**: Runs all 64 unit tests with MySQL
+-   🏗️ **Asset Building**: Compiles frontend assets
+-   🚀 **Production Deploy**: Deploys from `main` branch
 
-**Features:**
+### 🎯 Triggers
 
--   ✅ **Automated Testing**: Runs all 64 unit tests with MySQL service
--   🏗️ **Asset Building**: Compiles frontend assets with npm
--   🔍 **Code Quality**: PHP CS Fixer, PHPStan, dependency audits
--   🐳 **Docker Testing**: Validates Docker image builds
--   🚀 **Auto-Deploy**: Deploys to staging (`develop`) and production (`main`)
--   📢 **Notifications**: Team alerts on success/failure
+-   **Push to `main`/`develop`**: Runs tests and builds assets
+-   **Pull Requests**: Runs tests only
+-   **Production Deploy**: Only from `main` branch
 
-#### 2. **Pull Request Checks** (`pr-checks.yml`)
+### 🔧 Setup
 
-**Triggers:** Pull Requests only
+1. **Repository Secrets** (for deployment):
 
-**Features:**
+    ```
+    PRODUCTION_HOST=your-server.com
+    PRODUCTION_USER=deploy-user
+    PRODUCTION_KEY=your-ssh-private-key
+    ```
 
--   ⚡ **Quick Validation**: Fast unit test execution
--   🏗️ **Build Verification**: Frontend asset compilation
--   🔒 **Security Audit**: Dependency vulnerability checks
--   💬 **Auto Comments**: Test results posted to PR
+2. **Customize Deployment**: Edit the deploy step in `ci.yml`
 
-#### 3. **Deployment Management** (`deploy.yml`)
+### 🚀 Usage
 
-**Triggers:** Push to `main` + manual dispatch
-
-**Features:**
-
--   🌍 **Environment Deployments**: Staging and production
--   💾 **Backup Creation**: Pre-deployment backups
--   🏥 **Health Checks**: Post-deployment validation
--   🔄 **Auto Rollback**: Failure recovery
-
-#### 5. **Manual Testing** (`test.yml`)
-
-**Triggers:** Manual dispatch only
-
-**Features:**
-
--   🎯 **Configurable Tests**: Unit/Feature/All test suites
--   📊 **Coverage Reports**: Optional test coverage
--   🔍 **Verbose Output**: Detailed test logging
--   🐛 **Debug Mode**: On-demand testing for troubleshooting
-
-### 🎯 Workflow Triggers
-
-| Workflow       | Push to main | Push to develop | PR  | Manual |
-| -------------- | ------------ | --------------- | --- | ------ |
-| CI/CD Pipeline | ✅           | ✅              | ✅  | ❌     |
-| PR Checks      | ❌           | ❌              | ✅  | ❌     |
-| Deploy         | ✅           | ❌              | ❌  | ✅     |
-| Manual Tests   | ❌           | ❌              | ❌  | ✅     |
-
-### 🔧 Setup Instructions
-
-#### 1. **Repository Secrets**
-
-Add these secrets in GitHub Settings → Secrets and variables → Actions:
-
-**For Deployment:**
-
-```
-STAGING_HOST=your-staging-server.com
-STAGING_USER=deploy-user
-STAGING_KEY=your-ssh-private-key
-PRODUCTION_HOST=your-production-server.com
-PRODUCTION_USER=deploy-user
-PRODUCTION_KEY=your-ssh-private-key
-```
-
-**For Notifications (Optional):**
-
-```
-SLACK_WEBHOOK=https://hooks.slack.com/services/...
-DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
-```
-
-#### 2. **Environment Configuration**
-
-Set up environments in GitHub Settings → Environments:
-
--   **staging**: For staging deployments
--   **production**: For production deployments
-
-#### 3. **Branch Protection Rules**
-
-Configure branch protection for `main`:
-
--   Require status checks to pass
--   Require branches to be up to date
--   Require pull request reviews
-
-### 🚀 Usage Examples
-
-#### Running Tests Manually
-
-1. Go to **Actions** → **Test Suite**
-2. Click **Run workflow**
-3. Select test suite (Unit/Feature/All)
-4. Choose options (verbose, coverage)
-5. Click **Run workflow**
-
-#### Deploying to Production
-
-1. Go to **Actions** → **Deploy**
-2. Click **Run workflow**
-3. Select **production** environment
-4. Click **Run workflow**
-
-### 📊 Pipeline Status
-
-**Green ✅**: All checks passed - ready for deployment
-**Yellow ⚠️**: Some checks failed - review logs
-**Red ❌**: Critical failures - deployment blocked
-
-### 🛠️ Customization
-
-#### Adding New Tests
-
-```yaml
-# In ci.yml, add new test step
-- name: Run custom tests
-  run: php artisan test --testsuite=Custom
-```
-
-#### Custom Deployment Commands
-
-```yaml
-# In deploy.yml, replace example commands
-- name: Deploy to server
-  run: |
-      scp delaine-production.tar.gz ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:/var/www/
-      ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} "cd /var/www && tar -xzf delaine-production.tar.gz"
-```
-
-#### Environment Variables
-
-```yaml
-# Add custom environment variables
-env:
-    CUSTOM_VAR: ${{ secrets.CUSTOM_SECRET }}
-    APP_ENV: production
-```
-
-### 🔍 Monitoring & Debugging
-
-#### Viewing Workflow Logs
-
-1. Go to **Actions** tab
-2. Click on workflow run
-3. Expand failed step
-4. Review logs for errors
-
-#### Common Issues
-
-**Test Failures:**
-
-```bash
-# Check database connection
-php artisan migrate --env=testing
-
-# Clear caches
-php artisan config:clear --env=testing
-```
-
-**Deployment Issues:**
-
--   Verify SSH key permissions
--   Check server connectivity
--   Review deployment logs
-
-### 📈 Metrics & Reports
-
--   **Test Coverage**: Uploaded to Codecov
--   **Build Artifacts**: Stored for 90 days
--   **Deployment History**: Tracked in Actions
+-   **Automatic**: Tests run on every push and PR
+-   **Manual**: Can be triggered from GitHub Actions tab
+-   **Simple**: One workflow file, easy to understand and maintain
 
 ### 🎉 Benefits
 
--   **Automated Quality Assurance**: Every change is tested
--   **Faster Development**: Quick feedback on PRs
--   **Reliable Deployments**: Automated with rollback
--   **Team Collaboration**: Clear status and notifications
+-   **Fast**: Only essential steps, quick feedback
+-   **Reliable**: Focused on core functionality
+-   **Maintainable**: Easy to modify and extend
 
 #### Test Results
 
@@ -825,54 +674,29 @@ npm install
 
 ### CI/CD Troubleshooting
 
-#### Common CI/CD Issues and Solutions
+#### Common Issues
 
-**1. "tar: .: file changed as we read it" Error**
-This error occurs when files are being modified during the tar creation process. Our solution:
-
--   Uses `zip` instead of `tar` for more reliable packaging
--   Creates a clean copy in `/tmp/` before packaging
--   Excludes problematic directories (`node_modules`, `.git`, etc.)
-
-**2. Deprecated GitHub Actions**
-
--   Updated `actions/upload-artifact` from `v3` to `v4`
--   All workflows use current action versions
-
-**3. PHP CS Fixer Configuration**
-
--   Fixed by adding path parameter: `php-cs-fixer fix . --dry-run`
--   Ensures proper file discovery
-
-**4. Docker Build Context Issues**
-
--   Fixed by specifying working directory: `--workdir /var/www/html`
--   Ensures `artisan` command runs in correct context
-
-#### Testing Deployment Locally
-
-You can test the deployment package creation locally:
+**Test Failures:**
 
 ```bash
-# Run the test script
-./test-deployment.sh
+# Check database connection
+php artisan migrate --env=testing
 
-# Or manually test the process
-mkdir -p /tmp/delaine-test
-rsync -av --exclude='.git' --exclude='node_modules' --exclude='tests' --exclude='.github' --exclude='docker-compose.yml' --exclude='Dockerfile' --exclude='.env.example' --exclude='public/build' --exclude='vendor' . /tmp/delaine-test/
-cd /tmp/delaine-test
-composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
-npm ci
-npm run build
-zip -r delaine-test.zip . -x "node_modules/*" ".git/*" "*.log" "*.tmp"
+# Clear caches
+php artisan config:clear --env=testing
 ```
 
-#### Workflow Triggers
+**Deployment Issues:**
 
--   **Main CI/CD Pipeline**: Runs on push to `main`/`develop` and PRs
--   **Staging Deployment**: Runs on push to `develop` branch
--   **Production Deployment**: Runs on push to `main` branch
--   **Manual Deployment**: Available via GitHub Actions UI
+-   Verify SSH key permissions
+-   Check server connectivity
+-   Review deployment logs in GitHub Actions
+
+**Workflow Not Running:**
+
+-   Check branch protection rules
+-   Verify repository secrets are set
+-   Ensure workflow file is in `.github/workflows/`
 
 ## 📚 Additional Resources
 

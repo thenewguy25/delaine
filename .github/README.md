@@ -1,182 +1,59 @@
-# GitHub Actions Workflows
+# GitHub Actions CI/CD
 
-This directory contains GitHub Actions workflows for CI/CD automation of the Delaine project.
+Simple and focused CI/CD pipeline for the Delaine project.
 
-## 📋 Available Workflows
+## Workflow
 
-### 1. **CI/CD Pipeline** (`ci.yml`)
+### Main CI/CD Pipeline (`ci.yml`)
 
-**Triggers:** Push to `main`/`develop`, Pull Requests
+**Triggers:**
 
-**Jobs:**
+-   Push to `main` or `develop` branches
+-   Pull requests to `main` or `develop` branches
 
--   **Test**: Runs unit tests with MySQL service
--   **Build Assets**: Builds frontend assets
--   **Code Quality**: PHP CS Fixer, PHPStan, dependency audit
--   **Docker Build**: Tests Docker image build
--   **Deploy Staging**: Auto-deploy to staging on `develop` branch
--   **Deploy Production**: Auto-deploy to production on `main` branch
--   **Notify**: Team notifications
+**What it does:**
 
-### 2. **Pull Request Checks** (`pr-checks.yml`)
+1. **Tests**: Runs all unit tests with MySQL database
+2. **Build**: Compiles frontend assets
+3. **Deploy**: Deploys to production (main branch only)
 
-**Triggers:** Pull Requests to `main`/`develop`
+## Setup
 
-**Features:**
+1. **Repository Secrets** (if needed for deployment):
 
--   Quick unit test execution
--   Frontend asset building
--   Security vulnerability checks
--   Automatic PR comments with test results
+    ```
+    PRODUCTION_HOST=your-server.com
+    PRODUCTION_USER=deploy-user
+    PRODUCTION_KEY=your-ssh-private-key
+    ```
 
-### 3. **Deploy** (`deploy.yml`)
+2. **Environment Variables** (if needed):
+    ```
+    APP_ENV=production
+    ```
 
-**Triggers:** Push to `main`, Manual dispatch
+## Usage
 
-**Features:**
+-   **Automatic**: Tests run on every push and PR
+-   **Deployment**: Only deploys from `main` branch
+-   **Manual**: Can be triggered manually from GitHub Actions tab
 
--   Environment-specific deployments (staging/production)
--   Pre-deployment backups
--   Post-deployment health checks
--   Automatic rollback on failure
+## Customization
 
-### 4. **Test Suite** (`test.yml`)
+To add actual deployment commands, edit the deploy step in `ci.yml`:
 
-**Triggers:** Manual dispatch only
-
-**Features:**
-
--   On-demand test execution
--   Configurable test suites (Unit/Feature/All)
--   Optional verbose output and coverage reports
--   Manual trigger for debugging
-
-## 🚀 Quick Start
-
-### Running Tests Locally
-
-```bash
-# Run all unit tests
-php artisan test --testsuite=Unit
-
-# Run with coverage
-php artisan test --testsuite=Unit --coverage
-
-# Run specific test file
-php artisan test tests/Unit/UserTest.php
+```yaml
+- name: Deploy to production
+  run: |
+      # Add your deployment commands here
+      # Example:
+      # scp -r . user@server:/var/www/
+      # ssh user@server "cd /var/www && php artisan migrate --force"
 ```
 
-### Manual Workflow Triggers
+## Benefits
 
-1. **Run Tests**: Go to Actions → Test Suite → Run workflow
-2. **Deploy**: Go to Actions → Deploy → Run workflow (select environment)
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Set these in your repository secrets:
-
-**For Deployment:**
-
--   `STAGING_HOST`: Staging server hostname
--   `STAGING_USER`: Staging server username
--   `STAGING_KEY`: SSH private key for staging
--   `PRODUCTION_HOST`: Production server hostname
--   `PRODUCTION_USER`: Production server username
--   `PRODUCTION_KEY`: SSH private key for production
-
-**For Notifications:**
-
--   `SLACK_WEBHOOK`: Slack webhook URL (optional)
--   `DISCORD_WEBHOOK`: Discord webhook URL (optional)
-
-### Database Configuration
-
-The workflows use MySQL 8.0 service with these defaults:
-
--   **Host**: 127.0.0.1
--   **Port**: 3306
--   **Database**: delaine_test
--   **Username**: root
--   **Password**: password
-
-## 📊 Test Coverage
-
-The CI pipeline generates test coverage reports:
-
--   **Unit Tests**: 64 tests covering core functionality
--   **Coverage**: Uploaded to Codecov for tracking
--   **Reports**: Available in workflow artifacts
-
-## 🔄 Deployment Process
-
-### Staging Deployment
-
-1. Push to `develop` branch
-2. Tests run automatically
-3. On success, deploys to staging
-4. Post-deployment health checks
-
-### Production Deployment
-
-1. Push to `main` branch
-2. Full test suite runs
-3. Backup created
-4. Production deployment
-5. Health checks and rollback on failure
-
-## 📈 Monitoring
-
-### Workflow Status
-
--   **Green**: All checks passed
--   **Yellow**: Some checks failed (non-blocking)
--   **Red**: Critical checks failed (blocking)
-
-### Notifications
-
--   **Success**: Team notification on successful deployment
--   **Failure**: Alert on failed tests or deployments
--   **PR Comments**: Automatic test result comments
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Test Failures:**
-
-```bash
-# Check test database connection
-php artisan migrate --env=testing
-
-# Clear test cache
-php artisan config:clear --env=testing
-```
-
-**Deployment Failures:**
-
--   Check SSH key permissions
--   Verify server connectivity
--   Review deployment logs
-
-**Security Scan Issues:**
-
--   Update dependencies: `composer update`
--   Review vulnerability reports
--   Update Docker base images
-
-### Debug Mode
-
-Enable debug output by adding `--verbose` to workflow steps or using the manual test workflow with verbose option.
-
-## 📚 Additional Resources
-
--   [GitHub Actions Documentation](https://docs.github.com/en/actions)
--   [Laravel Testing Guide](https://laravel.com/docs/testing)
--   [PHPStan Documentation](https://phpstan.org/user-guide/getting-started)
--   [Trivy Security Scanner](https://trivy.dev/)
-
----
-
-**Need help?** Check the workflow logs or create an issue for workflow-specific problems.
+-   ✅ **Simple**: One workflow file, easy to understand
+-   ✅ **Fast**: Only essential steps, quick feedback
+-   ✅ **Reliable**: Focused on core functionality
+-   ✅ **Maintainable**: Easy to modify and extend
