@@ -1,0 +1,87 @@
+name: Test Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: "Test suite to run"
+        required: true
+        default: "Unit"
+        type: choice
+        options:
+          - Unit
+          - Feature
+          - All
+      verbose:
+        description: "Run with verbose output"
+        required: false
+        default: false
+        type: boolean
+      coverage:
+        description: "Generate coverage report"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  run-tests:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: delaine_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: bcmath, ctype, curl, dom, fileinfo, json, mbstring, openssl, pdo, tokenizer, xml
+          coverage: ${{ github.event.inputs.coverage }}
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Configure database
+        run: |
+          php artisan config:cache
+          php artisan migrate --env=testing
+
+      - name: Run tests
+        run: |
+          if [ "${{ github.event.inputs.test_suite }}" = "All" ]; then
+            php artisan test ${{ github.event.inputs.verbose == 'true' && '--verbose' || '' }} ${{ github.event.inputs.coverage == 'true' && '--coverage' || '' }}
+          else
+            php artisan test --testsuite=${{ github.event.inputs.test_suite }} ${{ github.event.inputs.verbose == 'true' && '--verbose' || '' }} ${{ github.event.inputs.coverage == 'true' && '--coverage' || '' }}
+          fi
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: delaine_test
+          DB_USERNAME: root
+          DB_PASSWORD: password
+
+      - name: Upload coverage report
+        if: github.event.inputs.coverage == 'true'
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: manual-tests
+          name: manual-test-coverage

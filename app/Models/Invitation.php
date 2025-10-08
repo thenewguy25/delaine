@@ -151,13 +151,30 @@ class Invitation extends Model
     }
 
     /**
+     * Find an invitation by token only.
+     */
+    public static function findByToken(string $token): ?self
+    {
+        return self::where('token', $token)->first();
+    }
+
+    /**
      * Find an invitation by token and email.
      */
-    public static function findByToken(string $token, string $email): ?self
+    public static function findByTokenAndEmail(string $token, string $email): ?self
     {
         return self::where('token', $token)
             ->where('email', $email)
             ->first();
+    }
+
+    /**
+     * Extend invitation expiry by specified hours.
+     */
+    public function extendExpiry(int $hours = 72): bool
+    {
+        $this->expires_at = now()->addHours($hours);
+        return $this->save();
     }
 
     /**

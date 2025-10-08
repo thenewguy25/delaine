@@ -26,10 +26,24 @@ A modern Laravel-based web application framework designed for rapid development 
     -   Hot reload for development
 
 -   **⚡ Developer Tools**
+
     -   Custom Artisan commands for admin creation
     -   ACL verification tools
     -   Comprehensive error handling
     -   Modern Blade components with Tailwind CSS
+
+-   **🧪 Comprehensive Testing**
+
+    -   64 unit tests covering all core functionality
+    -   User management, ACL, invitations, middleware, and admin features
+    -   Automated test database setup with RefreshDatabase
+    -   CI/CD ready with detailed test documentation
+
+-   **🚀 GitHub Actions CI/CD**
+    -   Automated testing on every push and PR
+    -   Code quality checks with PHPStan and PHP CS Fixer
+    -   Automated deployments to staging and production
+    -   Manual workflow triggers for on-demand testing
 
 ## 🛠️ Prerequisites
 
@@ -386,6 +400,385 @@ SESSION_LIFETIME=60
     - Login as admin user
     - Access `/admin/users`
     - Verify user management features
+
+## 🧪 Testing
+
+Delaine includes a comprehensive unit test suite covering all core functionality. The tests ensure code quality, catch regressions, and provide confidence when making changes.
+
+### Test Coverage
+
+The test suite includes **64 unit tests** covering:
+
+-   **User Management** (14 tests)
+
+    -   User creation and attributes
+    -   Role assignment and management
+    -   Permission checking through roles
+    -   User activation/deactivation functionality
+    -   Active/inactive user scoping
+
+-   **ACL System** (13 tests)
+
+    -   Role and permission creation
+    -   Permission assignment to roles
+    -   Role assignment to users
+    -   Permission checking (direct and through roles)
+    -   User scoping by roles and permissions
+
+-   **Invitation System** (15 tests)
+
+    -   Invitation creation and token generation
+    -   Expiry and usage status checking
+    -   Invitation validation logic
+    -   Marking invitations as used
+    -   Extending invitation expiry
+
+-   **Security Middleware** (7 tests)
+
+    -   Active user access allowance
+    -   Inactive user blocking
+    -   Session invalidation for inactive users
+    -   Unauthenticated user handling
+
+-   **Admin Features** (13 tests)
+    -   User impersonation functionality
+    -   Impersonation status checking
+    -   Edge cases and security measures
+
+### Running Tests
+
+#### Prerequisites
+
+Ensure you have a test database configured. The tests use Laravel's built-in testing features with `RefreshDatabase` trait.
+
+#### Local Testing
+
+```bash
+# Run all unit tests
+php artisan test --testsuite=Unit
+
+# Run specific test classes
+php artisan test tests/Unit/UserTest.php
+php artisan test tests/Unit/AclTest.php
+php artisan test tests/Unit/InvitationTest.php
+php artisan test tests/Unit/CheckActiveUserMiddlewareTest.php
+php artisan test tests/Unit/ImpersonationTest.php
+
+# Run tests with verbose output
+php artisan test --testsuite=Unit --verbose
+
+# Run tests and stop on first failure
+php artisan test --testsuite=Unit --stop-on-failure
+
+# Run tests with coverage (requires Xdebug)
+php artisan test --testsuite=Unit --coverage
+```
+
+#### Docker Testing
+
+```bash
+# Run tests inside Docker container
+docker-compose exec app php artisan test --testsuite=Unit
+
+# Run tests with verbose output
+docker-compose exec app php artisan test --testsuite=Unit --verbose
+```
+
+#### Test Database Setup
+
+The tests automatically:
+
+-   Use `RefreshDatabase` trait to reset database between tests
+-   Create unique roles/permissions to avoid conflicts
+-   Set up proper test data using factories
+
+#### Continuous Integration
+
+Delaine includes comprehensive GitHub Actions workflows for CI/CD:
+
+-   **CI/CD Pipeline**: Full test suite, code quality checks, and automated deployments
+-   **Pull Request Checks**: Quick validation for PRs with automatic comments
+-   **Deployment Management**: Automated staging and production deployments
+-   **Manual Testing**: On-demand test execution with configurable options
+
+See [`.github/README.md`](.github/README.md) for detailed workflow documentation.
+
+**Quick GitHub Actions Setup:**
+
+```yaml
+# Example workflow step
+- name: Run Unit Tests
+  run: |
+      php artisan test --testsuite=Unit --stop-on-failure
+```
+
+## 🚀 CI/CD Pipeline
+
+Delaine includes a complete GitHub Actions CI/CD pipeline with automated testing, code quality checks, security scanning, and deployments.
+
+### 📋 Available Workflows
+
+#### 1. **Main CI/CD Pipeline** (`ci.yml`)
+
+**Triggers:** Push to `main`/`develop`, Pull Requests
+
+**Features:**
+
+-   ✅ **Automated Testing**: Runs all 64 unit tests with MySQL service
+-   🏗️ **Asset Building**: Compiles frontend assets with npm
+-   🔍 **Code Quality**: PHP CS Fixer, PHPStan, dependency audits
+-   🐳 **Docker Testing**: Validates Docker image builds
+-   🚀 **Auto-Deploy**: Deploys to staging (`develop`) and production (`main`)
+-   📢 **Notifications**: Team alerts on success/failure
+
+#### 2. **Pull Request Checks** (`pr-checks.yml`)
+
+**Triggers:** Pull Requests only
+
+**Features:**
+
+-   ⚡ **Quick Validation**: Fast unit test execution
+-   🏗️ **Build Verification**: Frontend asset compilation
+-   🔒 **Security Audit**: Dependency vulnerability checks
+-   💬 **Auto Comments**: Test results posted to PR
+
+#### 3. **Deployment Management** (`deploy.yml`)
+
+**Triggers:** Push to `main` + manual dispatch
+
+**Features:**
+
+-   🌍 **Environment Deployments**: Staging and production
+-   💾 **Backup Creation**: Pre-deployment backups
+-   🏥 **Health Checks**: Post-deployment validation
+-   🔄 **Auto Rollback**: Failure recovery
+
+#### 5. **Manual Testing** (`test.yml`)
+
+**Triggers:** Manual dispatch only
+
+**Features:**
+
+-   🎯 **Configurable Tests**: Unit/Feature/All test suites
+-   📊 **Coverage Reports**: Optional test coverage
+-   🔍 **Verbose Output**: Detailed test logging
+-   🐛 **Debug Mode**: On-demand testing for troubleshooting
+
+### 🎯 Workflow Triggers
+
+| Workflow       | Push to main | Push to develop | PR  | Manual |
+| -------------- | ------------ | --------------- | --- | ------ |
+| CI/CD Pipeline | ✅           | ✅              | ✅  | ❌     |
+| PR Checks      | ❌           | ❌              | ✅  | ❌     |
+| Deploy         | ✅           | ❌              | ❌  | ✅     |
+| Manual Tests   | ❌           | ❌              | ❌  | ✅     |
+
+### 🔧 Setup Instructions
+
+#### 1. **Repository Secrets**
+
+Add these secrets in GitHub Settings → Secrets and variables → Actions:
+
+**For Deployment:**
+
+```
+STAGING_HOST=your-staging-server.com
+STAGING_USER=deploy-user
+STAGING_KEY=your-ssh-private-key
+PRODUCTION_HOST=your-production-server.com
+PRODUCTION_USER=deploy-user
+PRODUCTION_KEY=your-ssh-private-key
+```
+
+**For Notifications (Optional):**
+
+```
+SLACK_WEBHOOK=https://hooks.slack.com/services/...
+DISCORD_WEBHOOK=https://discord.com/api/webhooks/...
+```
+
+#### 2. **Environment Configuration**
+
+Set up environments in GitHub Settings → Environments:
+
+-   **staging**: For staging deployments
+-   **production**: For production deployments
+
+#### 3. **Branch Protection Rules**
+
+Configure branch protection for `main`:
+
+-   Require status checks to pass
+-   Require branches to be up to date
+-   Require pull request reviews
+
+### 🚀 Usage Examples
+
+#### Running Tests Manually
+
+1. Go to **Actions** → **Test Suite**
+2. Click **Run workflow**
+3. Select test suite (Unit/Feature/All)
+4. Choose options (verbose, coverage)
+5. Click **Run workflow**
+
+#### Deploying to Production
+
+1. Go to **Actions** → **Deploy**
+2. Click **Run workflow**
+3. Select **production** environment
+4. Click **Run workflow**
+
+### 📊 Pipeline Status
+
+**Green ✅**: All checks passed - ready for deployment
+**Yellow ⚠️**: Some checks failed - review logs
+**Red ❌**: Critical failures - deployment blocked
+
+### 🛠️ Customization
+
+#### Adding New Tests
+
+```yaml
+# In ci.yml, add new test step
+- name: Run custom tests
+  run: php artisan test --testsuite=Custom
+```
+
+#### Custom Deployment Commands
+
+```yaml
+# In deploy.yml, replace example commands
+- name: Deploy to server
+  run: |
+      scp delaine-production.tar.gz ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:/var/www/
+      ssh ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} "cd /var/www && tar -xzf delaine-production.tar.gz"
+```
+
+#### Environment Variables
+
+```yaml
+# Add custom environment variables
+env:
+    CUSTOM_VAR: ${{ secrets.CUSTOM_SECRET }}
+    APP_ENV: production
+```
+
+### 🔍 Monitoring & Debugging
+
+#### Viewing Workflow Logs
+
+1. Go to **Actions** tab
+2. Click on workflow run
+3. Expand failed step
+4. Review logs for errors
+
+#### Common Issues
+
+**Test Failures:**
+
+```bash
+# Check database connection
+php artisan migrate --env=testing
+
+# Clear caches
+php artisan config:clear --env=testing
+```
+
+**Deployment Issues:**
+
+-   Verify SSH key permissions
+-   Check server connectivity
+-   Review deployment logs
+
+### 📈 Metrics & Reports
+
+-   **Test Coverage**: Uploaded to Codecov
+-   **Build Artifacts**: Stored for 90 days
+-   **Deployment History**: Tracked in Actions
+
+### 🎉 Benefits
+
+-   **Automated Quality Assurance**: Every change is tested
+-   **Faster Development**: Quick feedback on PRs
+-   **Reliable Deployments**: Automated with rollback
+-   **Team Collaboration**: Clear status and notifications
+
+#### Test Results
+
+When all tests pass, you should see:
+
+```
+Tests:    64 passed (166 assertions)
+Duration: 0.52s
+```
+
+#### Writing New Tests
+
+When adding new features, follow these patterns:
+
+```php
+<?php
+
+namespace Tests\Unit;
+
+use Tests\TestCase;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class YourFeatureTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    public function it_can_do_something()
+    {
+        // Arrange
+        $user = User::factory()->create();
+
+        // Act
+        $result = $user->someMethod();
+
+        // Assert
+        $this->assertTrue($result);
+    }
+}
+```
+
+#### Test Best Practices
+
+1. **Use descriptive test names** that explain what is being tested
+2. **Follow AAA pattern**: Arrange, Act, Assert
+3. **Use factories** for creating test data
+4. **Test edge cases** and error conditions
+5. **Keep tests isolated** - each test should be independent
+6. **Use unique identifiers** to avoid conflicts between tests
+
+#### Troubleshooting Tests
+
+**Database Issues**
+
+```bash
+# Reset test database
+php artisan migrate:fresh --env=testing
+
+# Clear test cache
+php artisan config:clear --env=testing
+```
+
+**Permission Conflicts**
+
+```bash
+# Clear permission cache
+php artisan permission:cache-reset
+```
+
+**Memory Issues**
+
+```bash
+# Run tests with increased memory
+php -d memory_limit=512M artisan test --testsuite=Unit
+```
 
 ## 🚨 Troubleshooting
 
