@@ -69,25 +69,25 @@ jobs:
             exit 1
           fi
 
-          # Create the package using a more robust approach
-          tar -czf delaine-staging.tar.gz --exclude='node_modules' --exclude='.git' .
+          # Create the package using zip instead of tar (more reliable)
+          zip -r delaine-staging.zip . -x "node_modules/*" ".git/*" "*.log" "*.tmp"
 
           # Move package back to workspace
-          mv delaine-staging.tar.gz ${{ github.workspace }}/
+          mv delaine-staging.zip ${{ github.workspace }}/
 
       - name: Deploy to staging server
         run: |
           echo "🚀 Deploying to staging environment..."
           # Add your staging deployment commands here
           # Example:
-          # scp delaine-staging.tar.gz user@staging-server:/var/www/
-          # ssh user@staging-server "cd /var/www && tar -xzf delaine-staging.tar.gz && php artisan migrate --force && php artisan config:cache"
+          # scp delaine-staging.zip user@staging-server:/var/www/
+          # ssh user@staging-server "cd /var/www && unzip -o delaine-staging.zip && php artisan migrate --force && php artisan config:cache"
 
       - name: Cleanup temporary files
         if: always()
         run: |
           rm -rf /tmp/delaine-deploy
-          rm -f delaine-staging.tar.gz
+          rm -f delaine-staging.zip
 
       - name: Run post-deployment tests
         run: |
@@ -153,11 +153,11 @@ jobs:
             exit 1
           fi
 
-          # Create the package using a more robust approach
-          tar -czf delaine-production.tar.gz --exclude='node_modules' --exclude='.git' .
+          # Create the package using zip instead of tar (more reliable)
+          zip -r delaine-production.zip . -x "node_modules/*" ".git/*" "*.log" "*.tmp"
 
           # Move package back to workspace
-          mv delaine-production.tar.gz ${{ github.workspace }}/
+          mv delaine-production.zip ${{ github.workspace }}/
 
       - name: Create backup
         run: |
@@ -170,14 +170,14 @@ jobs:
           echo "🚀 Deploying to production environment..."
           # Add your production deployment commands here
           # Example:
-          # scp delaine-production.tar.gz user@prod-server:/var/www/
-          # ssh user@prod-server "cd /var/www && tar -xzf delaine-production.tar.gz && php artisan migrate --force && php artisan config:cache && php artisan queue:restart"
+          # scp delaine-production.zip user@prod-server:/var/www/
+          # ssh user@prod-server "cd /var/www && unzip -o delaine-production.zip && php artisan migrate --force && php artisan config:cache && php artisan queue:restart"
 
       - name: Cleanup temporary files
         if: always()
         run: |
           rm -rf /tmp/delaine-deploy-prod
-          rm -f delaine-production.tar.gz
+          rm -f delaine-production.zip
 
       - name: Run post-deployment tests
         run: |
