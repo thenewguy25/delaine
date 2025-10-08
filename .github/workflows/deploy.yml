@@ -50,13 +50,20 @@ jobs:
         run: |
           # Create a clean copy of the project for packaging
           mkdir -p /tmp/delaine-deploy
-          cp -r . /tmp/delaine-deploy/
+
+          # Copy source files only (excluding build artifacts and unnecessary files)
+          rsync -av --exclude='.git' --exclude='node_modules' --exclude='tests' --exclude='.github' --exclude='docker-compose.yml' --exclude='Dockerfile' --exclude='.env.example' --exclude='public/build' --exclude='vendor' . /tmp/delaine-deploy/
+
           cd /tmp/delaine-deploy
 
-          # Remove unnecessary files
-          rm -rf .git node_modules tests .github docker-compose.yml Dockerfile .env.example
+          # Install production dependencies in the clean copy
+          composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
+          npm ci
 
-          # Create the package
+          # Build assets in the clean copy
+          npm run build
+
+          # Now create the package (no file conflicts since we're in a clean directory)
           tar -czf delaine-staging.tar.gz .
 
           # Move package back to workspace
@@ -121,13 +128,20 @@ jobs:
         run: |
           # Create a clean copy of the project for packaging
           mkdir -p /tmp/delaine-deploy-prod
-          cp -r . /tmp/delaine-deploy-prod/
+
+          # Copy source files only (excluding build artifacts and unnecessary files)
+          rsync -av --exclude='.git' --exclude='node_modules' --exclude='tests' --exclude='.github' --exclude='docker-compose.yml' --exclude='Dockerfile' --exclude='.env.example' --exclude='public/build' --exclude='vendor' . /tmp/delaine-deploy-prod/
+
           cd /tmp/delaine-deploy-prod
 
-          # Remove unnecessary files
-          rm -rf .git node_modules tests .github docker-compose.yml Dockerfile .env.example
+          # Install production dependencies in the clean copy
+          composer install --no-progress --prefer-dist --optimize-autoloader --no-dev
+          npm ci
 
-          # Create the package
+          # Build assets in the clean copy
+          npm run build
+
+          # Now create the package (no file conflicts since we're in a clean directory)
           tar -czf delaine-production.tar.gz .
 
           # Move package back to workspace
