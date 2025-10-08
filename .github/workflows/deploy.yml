@@ -48,15 +48,19 @@ jobs:
 
       - name: Create deployment package
         run: |
-          tar -czf delaine-staging.tar.gz \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='tests' \
-            --exclude='.github' \
-            --exclude='docker-compose.yml' \
-            --exclude='Dockerfile' \
-            --exclude='.env.example' \
-            .
+          # Create a clean copy of the project for packaging
+          mkdir -p /tmp/delaine-deploy
+          cp -r . /tmp/delaine-deploy/
+          cd /tmp/delaine-deploy
+
+          # Remove unnecessary files
+          rm -rf .git node_modules tests .github docker-compose.yml Dockerfile .env.example
+
+          # Create the package
+          tar -czf delaine-staging.tar.gz .
+
+          # Move package back to workspace
+          mv delaine-staging.tar.gz ${{ github.workspace }}/
 
       - name: Deploy to staging server
         run: |
@@ -65,6 +69,12 @@ jobs:
           # Example:
           # scp delaine-staging.tar.gz user@staging-server:/var/www/
           # ssh user@staging-server "cd /var/www && tar -xzf delaine-staging.tar.gz && php artisan migrate --force && php artisan config:cache"
+
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          rm -rf /tmp/delaine-deploy
+          rm -f delaine-staging.tar.gz
 
       - name: Run post-deployment tests
         run: |
@@ -109,15 +119,19 @@ jobs:
 
       - name: Create deployment package
         run: |
-          tar -czf delaine-production.tar.gz \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='tests' \
-            --exclude='.github' \
-            --exclude='docker-compose.yml' \
-            --exclude='Dockerfile' \
-            --exclude='.env.example' \
-            .
+          # Create a clean copy of the project for packaging
+          mkdir -p /tmp/delaine-deploy-prod
+          cp -r . /tmp/delaine-deploy-prod/
+          cd /tmp/delaine-deploy-prod
+
+          # Remove unnecessary files
+          rm -rf .git node_modules tests .github docker-compose.yml Dockerfile .env.example
+
+          # Create the package
+          tar -czf delaine-production.tar.gz .
+
+          # Move package back to workspace
+          mv delaine-production.tar.gz ${{ github.workspace }}/
 
       - name: Create backup
         run: |
@@ -132,6 +146,12 @@ jobs:
           # Example:
           # scp delaine-production.tar.gz user@prod-server:/var/www/
           # ssh user@prod-server "cd /var/www && tar -xzf delaine-production.tar.gz && php artisan migrate --force && php artisan config:cache && php artisan queue:restart"
+
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          rm -rf /tmp/delaine-deploy-prod
+          rm -f delaine-production.tar.gz
 
       - name: Run post-deployment tests
         run: |
