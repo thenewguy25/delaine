@@ -1,0 +1,11 @@
+/* Startup NextJS Template Template Styles */
+
+.template-container {
+    @apply min-h-screen bg-gray-50;
+}
+
+.template-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+}
+
+/* Add your custom styles here */

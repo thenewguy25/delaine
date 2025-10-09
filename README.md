@@ -596,6 +596,18 @@ php artisan delaine:remove-template blog-template
 
 ### 🛠️ Creating Templates
 
+#### **Quick Start - Generate Template Structure:**
+
+```bash
+# Create a new template with proper structure
+php artisan delaine:create-template "My Dashboard Template"
+
+# Or use interactive mode
+php artisan delaine:create-template
+```
+
+#### **Template Structure:**
+
 Templates focus on **frontend assets** and follow a simple structure:
 
 -   **styles**: CSS files (Tailwind, custom CSS)
@@ -603,6 +615,19 @@ Templates focus on **frontend assets** and follow a simple structure:
 -   **components**: Blade components (reusable UI elements)
 -   **layouts**: Blade layouts (page structures)
 -   **assets**: Images, fonts, static files
+
+#### **Template Creation Options:**
+
+```bash
+# With all parameters
+php artisan delaine:create-template "My Template" --description="Beautiful dashboard" --author="John Doe" --template-version="2.0.0"
+
+# Interactive mode (prompts for missing info)
+php artisan delaine:create-template
+
+# Custom output directory
+php artisan delaine:create-template "My Template" --output="./custom-templates"
+```
 
 See [`templates/README.md`](templates/README.md) for detailed documentation.
 

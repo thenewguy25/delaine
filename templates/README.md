@@ -4,6 +4,16 @@ The Delaine framework includes a powerful template integration system focused on
 
 ## 🚀 Quick Start
 
+### Creating a New Template
+
+```bash
+# Generate a new template with proper structure
+php artisan delaine:create-template "My Dashboard Template"
+
+# Interactive mode (prompts for all details)
+php artisan delaine:create-template
+```
+
 ### Installing a Template
 
 ```bash
@@ -78,7 +88,27 @@ Every template must include a `delaine-template.json` file:
 
 ## 🛠️ Creating Templates
 
-### 1. Create Template Structure
+### 1. Generate Template Structure (Recommended)
+
+```bash
+# Create a new template with proper structure
+php artisan delaine:create-template "My Dashboard Template"
+
+# Interactive mode (prompts for all details)
+php artisan delaine:create-template
+
+# With custom options
+php artisan delaine:create-template "My Template" --description="Beautiful dashboard" --author="John Doe" --template-version="2.0.0"
+```
+
+This command automatically creates:
+
+-   ✅ Proper directory structure
+-   ✅ Sample files with working examples
+-   ✅ Template manifest (`delaine-template.json`)
+-   ✅ Documentation (README.md)
+
+### 2. Manual Template Structure (Alternative)
 
 ```bash
 mkdir my-template
@@ -86,11 +116,11 @@ cd my-template
 mkdir -p {styles,scripts,components,layouts,assets/{css,js,images}}
 ```
 
-### 2. Create Manifest
+### 3. Create Manifest (if not using generator)
 
 Create `delaine-template.json` with your template configuration.
 
-### 3. Add Template Files
+### 4. Add Template Files
 
 Place your files in the appropriate directories:
 
@@ -100,7 +130,7 @@ Place your files in the appropriate directories:
 -   **layouts**: Blade layouts (page structures)
 -   **assets**: Images, fonts, static files
 
-### 4. Test Template
+### 5. Test Template
 
 ```bash
 # Test your template
