@@ -81,13 +81,13 @@ Before you begin, ensure you have the following installed:
 3. **Start Docker services** (This will automatically run all setup commands via `start.sh`)
 
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 4. **Create admin user**
 
     ```bash
-    docker-compose exec app php artisan make:admin
+    docker compose exec app php artisan make:admin
     ```
 
 5. **Access your application**
@@ -202,7 +202,7 @@ php artisan verify:acl
 php artisan serve
 
 # Watch for changes (with Docker)
-docker-compose exec app npm run dev
+docker compose exec app npm run dev
 
 # Clear caches
 php artisan cache:clear
@@ -351,7 +351,7 @@ Route::middleware(['auth', 'role:admin|moderator'])->group(function () {
 -   **app**: Laravel application (PHP 8.2, Apache)
     -   **URL**: http://localhost:8000
 -   **db**: MySQL 8.0 database
-    -   **Port**: 3306
+    -   **Port**: 6607 (external) / 3306 (internal)
 -   **mailpit**: Email testing service
     -   **Web UI**: http://localhost:8025
     -   **SMTP Port**: 1025
@@ -360,7 +360,7 @@ Route::middleware(['auth', 'role:admin|moderator'])->group(function () {
 
 -   **Application**: http://localhost:8000
 -   **Mailpit (Email Testing)**: http://localhost:8025
--   **Database**: localhost:3306
+-   **Database**: localhost:6607
 
 ### Environment Variables
 
@@ -487,10 +487,10 @@ php artisan test --testsuite=Unit --coverage
 
 ```bash
 # Run tests inside Docker container
-docker-compose exec app php artisan test --testsuite=Unit
+docker compose exec app php artisan test --testsuite=Unit
 
 # Run tests with verbose output
-docker-compose exec app php artisan test --testsuite=Unit --verbose
+docker compose exec app php artisan test --testsuite=Unit --verbose
 ```
 
 #### Test Database Setup
@@ -722,13 +722,13 @@ php -d memory_limit=512M artisan test --testsuite=Unit
 
 ```bash
 # Check if database is running
-docker-compose ps
+docker compose ps
 
 # Restart database
-docker-compose restart db
+docker compose restart db
 
 # If start.sh didn't run properly, restart the app container
-docker-compose restart app
+docker compose restart app
 ```
 
 **Permission Errors**

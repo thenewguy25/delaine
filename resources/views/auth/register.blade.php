@@ -46,8 +46,8 @@
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $invitation?->email)" required autocomplete="username" @if($invitation) readonly @endif />
-            @if($invitation)
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $invitation?->email)" required autocomplete="username" :disabled="$invitation && $invitation->email" />
+            @if($invitation && $invitation->email)
                 <p class="mt-1 text-sm text-gray-600">Email is pre-filled from your invitation.</p>
             @endif
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
