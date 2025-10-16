@@ -55,55 +55,22 @@ A modern Laravel-based web application framework designed for rapid development 
 
 Before you begin, ensure you have the following installed:
 
+### For Local Development (Recommended)
+
 -   **PHP 8.2+** with extensions: `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo`, `tokenizer`, `xml`
 -   **Composer** (latest version)
 -   **Node.js 18+** and **npm**
--   **Docker** and **Docker Compose** (for containerized setup)
+-   **MySQL** or **MariaDB** database
 -   **Git**
+
+### For Docker Setup (Alternative)
+
+-   **Docker** and **Docker Compose**
+-   **Node.js 18+** and **npm** (for building assets on host)
 
 ## 🚀 Quick Start
 
-### Option 1: Docker Setup (Recommended)
-
-1. **Clone the repository**
-
-    ```bash
-    git clone https://github.com/thenewguy25/delaine.git
-    cd delaine
-    ```
-
-2. **Set up environment**
-
-    ```bash
-    cp .env.example .env
-    ```
-
-3. **Start Docker services** (This will automatically run all setup commands via `start.sh`)
-
-    ```bash
-    docker compose up -d
-    ```
-
-4. **Create admin user**
-
-    ```bash
-    docker compose exec app php artisan make:admin
-    ```
-
-5. **Access your application**
-    - **Web App**: http://localhost:8000
-    - **Admin Panel**: http://localhost:8000/admin/users
-    - **Mailpit**: http://localhost:8025
-
-> **Note**: The `start.sh` script automatically handles:
->
-> -   Installing PHP dependencies (`composer install`)
-> -   Installing Node.js dependencies (`npm install`)
-> -   Generating application key (`php artisan key:generate`)
-> -   Running database migrations (`php artisan migrate`)
-> -   Starting Laravel server and Vite dev server
-
-### Option 2: Local Development Setup
+### Option 1: Local Development Setup (Recommended)
 
 1. **Clone and navigate**
 
@@ -150,10 +117,61 @@ Before you begin, ensure you have the following installed:
     ```
 
 7. **Build assets and serve**
+
     ```bash
     npm run build
     php artisan serve
     ```
+
+8. **Access your application**
+    - **Web App**: http://localhost:8000
+    - **Admin Panel**: http://localhost:8000/admin/users
+
+### Option 2: Docker Setup (Alternative)
+
+1. **Clone the repository**
+
+    ```bash
+    git clone https://github.com/thenewguy25/delaine.git
+    cd delaine
+    ```
+
+2. **Set up environment**
+
+    ```bash
+    cp .env.example .env
+    ```
+
+3. **Build assets on host machine** (Recommended to avoid ARM64 issues)
+
+    ```bash
+    npm run build
+    ```
+
+4. **Start Docker services** (This will automatically run all setup commands via `start.sh`)
+
+    ```bash
+    docker compose up -d
+    ```
+
+5. **Create admin user**
+
+    ```bash
+    docker compose exec app php artisan make:admin
+    ```
+
+6. **Access your application**
+    - **Web App**: http://localhost:8000
+    - **Admin Panel**: http://localhost:8000/admin/users
+    - **Mailpit**: http://localhost:8025
+
+> **Note**: The `start.sh` script automatically handles:
+>
+> -   Installing PHP dependencies (`composer install`)
+> -   Installing Node.js dependencies (`npm install`)
+> -   Generating application key (`php artisan key:generate`)
+> -   Running database migrations (`php artisan migrate`)
+> -   Starting Laravel server and Vite dev server
 
 ## 🎨 Phase 8: Dashboard UI Improvements
 
