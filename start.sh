@@ -15,6 +15,17 @@ fi
 # Generate key if not set
 php artisan key:generate --force
 
+# Wait for database to be ready
+echo "Waiting for database to be ready..."
+for i in {1..30}; do
+    if php artisan tinker --execute="DB::connection()->getPdo();" > /dev/null 2>&1; then
+        echo "Database is ready!"
+        break
+    fi
+    echo "Attempt $i: Database not ready, waiting 2 seconds..."
+    sleep 2
+done
+
 # Run migrations
 php artisan migrate --force
 
