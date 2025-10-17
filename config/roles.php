@@ -23,24 +23,24 @@ return [
     */
     'default_roles' => [
         'admin' => [
-            'permissions' => ['manage users', 'manage roles', 'manage permissions', 'manage settings'],
+            'permissions' => ['manage users', 'manage roles', 'manage permissions', 'manage settings', 'access dashboard', 'manage profile'],
             'description' => 'Full system access with all permissions',
         ],
         'moderator' => [
-            'permissions' => ['moderate content', 'manage comments'],
+            'permissions' => ['moderate content', 'manage comments', 'access dashboard', 'manage profile'],
             'description' => 'Content moderation and comment management',
         ],
         'editor' => [
-            'permissions' => ['create posts', 'edit posts', 'delete posts'],
+            'permissions' => ['create posts', 'edit posts', 'delete posts', 'access dashboard', 'manage profile'],
             'description' => 'Content creation and editing capabilities',
         ],
         'analyst' => [
-            'permissions' => ['view analytics'],
+            'permissions' => ['view analytics', 'access dashboard', 'manage profile'],
             'description' => 'Analytics and reporting access',
         ],
         'user' => [
-            'permissions' => [],
-            'description' => 'Basic user access with no special permissions',
+            'permissions' => ['access dashboard', 'manage profile'],
+            'description' => 'Basic user access with dashboard and profile management',
         ],
     ],
 
@@ -64,6 +64,8 @@ return [
         'delete posts',
         'view analytics',
         'manage settings',
+        'access dashboard',
+        'manage profile',
     ],
 
     /*

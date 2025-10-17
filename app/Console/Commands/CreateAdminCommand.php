@@ -120,6 +120,8 @@ class CreateAdminCommand extends Command
             'manage roles',
             'manage permissions',
             'manage settings',
+            'access dashboard',  // Shared permission
+            'manage profile',     // Shared permission
         ];
 
         foreach ($permissions as $permission) {
@@ -130,8 +132,9 @@ class CreateAdminCommand extends Command
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $adminRole->syncPermissions($permissions);
 
-        // Create user role (basic access)
-        Role::firstOrCreate(['name' => 'user']);
+        // Create user role with shared permissions
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole->syncPermissions(['access dashboard', 'manage profile']);
 
         $this->info('✅ Essential roles and permissions configured');
         $this->info('💡 To add more roles, use: php artisan role:add <role_name> <permissions>');

@@ -18,16 +18,21 @@ class RoleSeeder extends Seeder
 
         // Create permissions
         $permissions = [
+            // Admin permissions
             'manage users',
             'manage roles',
             'manage permissions',
+            'manage settings',
+            // Content permissions
             'moderate content',
             'manage comments',
             'create posts',
             'edit posts',
             'delete posts',
             'view analytics',
-            'manage settings',
+            // Shared permissions (accessible by multiple roles)
+            'access dashboard',
+            'manage profile',
         ];
 
         foreach ($permissions as $permission) {
@@ -38,24 +43,31 @@ class RoleSeeder extends Seeder
         // Create roles with permissions
         $roles = [
             'admin' => [
-                'permissions' => ['manage users', 'manage roles', 'manage permissions', 'manage settings'],
-                'description' => 'Full system access'
+                'permissions' => [
+                    'manage users',
+                    'manage roles',
+                    'manage permissions',
+                    'manage settings',
+                    'access dashboard',
+                    'manage profile'  // Shared permissions
+                ],
+                'description' => 'Full system access with all permissions'
             ],
             'moderator' => [
-                'permissions' => ['moderate content', 'manage comments'],
+                'permissions' => ['moderate content', 'manage comments', 'access dashboard', 'manage profile'],
                 'description' => 'Content moderation access'
             ],
             'editor' => [
-                'permissions' => ['create posts', 'edit posts', 'delete posts'],
+                'permissions' => ['create posts', 'edit posts', 'delete posts', 'access dashboard', 'manage profile'],
                 'description' => 'Content creation and editing'
             ],
             'analyst' => [
-                'permissions' => ['view analytics'],
+                'permissions' => ['view analytics', 'access dashboard', 'manage profile'],
                 'description' => 'Analytics and reporting access'
             ],
             'user' => [
-                'permissions' => [],
-                'description' => 'Basic user access'
+                'permissions' => ['access dashboard', 'manage profile'],
+                'description' => 'Basic user access with dashboard and profile management'
             ],
         ];
 

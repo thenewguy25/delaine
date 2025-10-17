@@ -10,16 +10,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Dashboard route - protected by permission (accessible by all authenticated users with 'access dashboard' permission)
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'permission:access dashboard'])->name('dashboard');
 
 // Blog template demo route
 Route::get('/blog-demo', function () {
     return view('blog-demo');
 })->name('blog-demo');
 
-Route::middleware('auth')->group(function () {
+// Profile routes - protected by permission (accessible by all authenticated users with 'manage profile' permission)
+Route::middleware(['auth', 'permission:manage profile'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
